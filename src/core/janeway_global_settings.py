@@ -429,7 +429,7 @@ DUMMY_EMAIL_DOMAIN = "@journal.com"
 
 # Settings for use with Mailgun
 MAILGUN_ACCESS_KEY = os.environ["MAILGUN_API_KEY"]
-MAILGUN_SERVER_NAME = os.environ["MAILGUN_SERVER_NAME"]
+MAILGUN_SERVER_NAME = os.environ["MAILGUN_DOMAIN"]
 MAILGUN_REQUIRE_TLS = False
 ENABLE_ENHANCED_MAILGUN_FEATURES = False  # Enables email tracking
 
