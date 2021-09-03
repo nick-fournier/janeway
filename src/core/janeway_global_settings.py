@@ -20,6 +20,8 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 import os
 import sys
 import logging
+import dotenv
+#import django_heroku
 
 from django.contrib import messages
 
@@ -29,12 +31,17 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PROJECT_DIR = os.path.dirname(BASE_DIR)
 sys.path.append(os.path.join(BASE_DIR, "plugins"))
 
+# Load .env file
+dotenv_file = os.path.join(BASE_DIR, ".env")
+if os.path.isfile(dotenv_file):
+    dotenv.load_dotenv(dotenv_file)
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
 # You should change this key before you go live!
-SECRET_KEY = 'uxprsdhk^gzd-r=_287byolxn)$k6tsd8_cepl^s^tms2w1qrv'
+SECRET_KEY = os.environ["SECRET_KEY"]
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
@@ -100,6 +107,8 @@ INSTALLED_APPS += plugin_installed_apps.load_plugin_apps(BASE_DIR)
 INSTALLED_APPS += plugin_installed_apps.load_homepage_element_apps(BASE_DIR)
 
 MIDDLEWARE_CLASSES = (
+    'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -107,7 +116,6 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django.middleware.security.SecurityMiddleware',
     'core.middleware.TimezoneMiddleware',
     'core.middleware.SiteSettingsMiddleware',
     'utils.template_override_middleware.ThemeEngineMiddleware',
@@ -176,7 +184,7 @@ SETTINGS_EXPORT = [
 ]
 
 WSGI_APPLICATION = 'core.wsgi.application'
-DEFAULT_HOST = 'https://www.example.org'  # This is the default redirect if no other sites are found.
+DEFAULT_HOST = 'https://www.diogenes.press'  # This is the default redirect if no other sites are found.
 
 # Database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
@@ -258,6 +266,9 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'static'),
 )
 STATIC_URL = '/static/'
+#STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+#STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
+
 
 if ENABLE_TEXTURE:
     STATICFILES_DIRS.append(os.path.join(BASE_DIR, 'texture'))
@@ -409,16 +420,16 @@ LOGIN_REDIRECT_URL = '/user/profile/'
 LOGIN_URL = '/login/'
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = ''
-EMAIL_PORT = ''
-EMAIL_HOST_USER = ''
-EMAIL_HOST_PASSWORD = ''
+EMAIL_HOST = os.environ["MAILGUN_SMTP_SERVER"]
+EMAIL_PORT = os.environ["MAILGUN_SMTP_PORT"]
+EMAIL_HOST_USER = os.environ["MAILGUN_SMTP_LOGIN"]
+EMAIL_HOST_PASSWORD = os.environ["MAILGUN_SMTP_PASSWORD"]
 EMAIL_USE_TLS = True
 DUMMY_EMAIL_DOMAIN = "@journal.com"
 
 # Settings for use with Mailgun
-MAILGUN_ACCESS_KEY = ''
-MAILGUN_SERVER_NAME = ''
+MAILGUN_ACCESS_KEY = os.environ["MAILGUN_ACCESS_KEY"]
+MAILGUN_SERVER_NAME = os.environ["MAILGUN_SERVER_NAME"]
 MAILGUN_REQUIRE_TLS = False
 ENABLE_ENHANCED_MAILGUN_FEATURES = False  # Enables email tracking
 
@@ -436,15 +447,14 @@ ENABLE_ORCID = True
 ORCID_API_URL = 'http://pub.orcid.org/v1.2_rc7/'
 ORCID_URL = 'https://orcid.org/oauth/authorize'
 ORCID_TOKEN_URL = 'https://pub.orcid.org/oauth/token'
-ORCID_CLIENT_SECRET = ''
-ORCID_CLIENT_ID = ''
-
+ORCID_CLIENT_SECRET = os.environ["ORCID_CLIENT_SECRET"]
+ORCID_CLIENT_ID = os.environ["ORCID_CLIENT_ID"]
 
 SESSION_COOKIE_NAME = 'JANEWAYSESSID'
 
-S3_ACCESS_KEY = ''
-S3_SECRET_KEY = ''
-S3_BUCKET_NAME = ''
+S3_ACCESS_KEY = os.environ["S3_ACCESS_KEY"]
+S3_SECRET_KEY = os.environ["S3_SECRET_KEY"]
+S3_BUCKET_NAME = os.environ["S3_BUCKET_NAME"]
 END_POINT = 'eu-west-2'  # eg. eu-west-1
 S3_HOST = 's3.eu-west-2.amazonaws.com'  # eg. s3.eu-west-1.amazonaws.com
 
@@ -458,9 +468,9 @@ URL_CONFIG = 'path'  # path or domain
 # You can get reCaptcha keys for your domain here: https://developers.google.com/recaptcha/intro
 # You can set either to use Google's reCaptcha or a basic math field with no external requirements
 
-CAPTCHA_TYPE = 'simple_math'  # should be either 'simple_math' or 'recaptcha' to enable captcha fields otherwise disabled
-RECAPTCHA_PRIVATE_KEY = '' # Public and private keys are required when using recaptcha
-RECAPTCHA_PUBLIC_KEY = ''
+CAPTCHA_TYPE = 'recaptcha'  # should be either 'simple_math' or 'recaptcha' to enable captcha fields otherwise disabled
+RECAPTCHA_PRIVATE_KEY = os.environ["RECAPTCHA_PRIVATE_KEY"] # Public and private keys are required when using recaptcha
+RECAPTCHA_PUBLIC_KEY = os.environ["RECAPTCHA_PUBLIC_KEY"]
 
 BOOTSTRAP4 = {
     'required_css_class': 'required',
@@ -504,4 +514,7 @@ if (
     logging.info("Skipping migrations")
     logging.disable(logging.CRITICAL)
     MIGRATION_MODULES = SkipMigrations()
+
+# Activate Django-Heroku.
+#django_heroku.settings(locals())
 
