@@ -58,7 +58,7 @@ docs/_build/
 target/
 
 # Django
-src/core/settings.py
+#src/core/settings.py
 *.sqlite*
 *.db
 *tar.gz
